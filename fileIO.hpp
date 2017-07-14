@@ -5,6 +5,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "system.hpp"
+
 namespace fileIO
 {
     // returns the extension for a target file string
@@ -39,7 +41,12 @@ namespace fileIO
     // directory separator
     char getPlatformSeparator()
     {
-        return '/';
+        if(System::_system_platform == System::SYSTEM_WINDOWS) {
+            return '\\';
+        }
+        else {
+            return '/';
+        }
     }
 
     // creating a platform-dependent string path from the
