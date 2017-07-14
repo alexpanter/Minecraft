@@ -13,4 +13,4 @@ for the game engine:
 * `texture.hpp` - wrapper class for all game textures
 * `timer.hpp` - simple timer loop
 * `window.hpp` - draw the main window
-
+* `system.hpp` - system and platform related functions, e.g. which operating system.
