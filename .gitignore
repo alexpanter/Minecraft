@@ -1,0 +1,6 @@
+# ignore the compiled main file
+main
+
+#ignore any compiled libraries and assemblies
+*.so
+*.dll
