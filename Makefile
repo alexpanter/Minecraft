@@ -10,5 +10,13 @@ main: main.cpp
 test: clean main
 	./main
 
+soil:
+	cd lib
+	cd soil
+# COMPILE LIBRARY FOR WINDOWS !
+
+windows: clean soil
+# RUN ON WINDOWS !
+
 clean:
 	rm -rf *.o main
