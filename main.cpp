@@ -1,46 +1,25 @@
 
-#if defined(__linux__) || defined(linux) || defined(__linux) || defined(__APPLE__) || defined(__MACH__)
-    // GLEW
-    #ifndef GLEW_STATIC
-    #define GLEW_STATIC
-    #endif
-    #include <GL/glew.h>
-
-    // GLFW
-    #include <GLFW/glfw3.h>
-
-    // GLM
-    #include <glm/glm.hpp>
-    #include <glm/gtc/matrix_transform.hpp>
-    #include <glm/gtc/type_ptr.hpp>
-    //#include <glm/gtc/constants.hpp>
-
-    // CUSTOM
-    #include "engine/shaders.hpp"
-    #include "engine/window.hpp"
-    #include "engine/texture.hpp"
-    #include "engine/camera.hpp"
-#else
-    // GLEW
-    #ifndef GLEW_STATIC
-    #define GLEW_STATIC
-    #endif
-    #include "lib\\GL\\glew.h"
-
-    // GLFW
-    #include "lib\\GLFW\\glfw3.h"
-
-    // GLM
-    #include "lib\\glm\\glm.hpp"
-    #include "lib\\glm\\gtc\\matrix_transform.hpp"
-    #include "lib\\glm\\gtc\\type_ptr.hpp"
-
-    // CUSTOM
-    #include "engine\\shaders.hpp"
-    #include "engine\\window.hpp"
-    #include "engine\\texture.hpp"
-    #include "engine\\camera.hpp"
+// GLEW
+#ifndef GLEW_STATIC
+#define GLEW_STATIC
 #endif
+#include <GL/glew.h>
+
+// GLFW
+#include <GLFW/glfw3.h>
+
+// GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+//#include <glm/gtc/constants.hpp>
+
+// CUSTOM
+#include "engine/shaders.hpp"
+#include "engine/window.hpp"
+#include "engine/texture.hpp"
+#include "engine/camera.hpp"
+
 
 
 // FUNCTION PROTOTYPES:
