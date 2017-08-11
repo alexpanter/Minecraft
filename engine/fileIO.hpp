@@ -69,7 +69,7 @@ namespace fileIO
     }
 
     // almost same as above, e.g. usage:
-    // getPlatformPath("path1.path2.path3") -> "path1/path2/path3/"
+    // getPlatformPath("path1|path2|path3") -> "path1/path2/path3/"
     std::string getPlatformPath(const char* path)
     {
         return getPlatformFilePath(path) + getPlatformSeparator();
