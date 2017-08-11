@@ -1,6 +1,15 @@
+# ignore Emacs backup files
+\#.*
+*.\#
+
 # ignore the compiled main file
 main
 
-#ignore any compiled libraries and assemblies
+# ignore any compiled libraries and assemblies
 *.so
 *.dll
+
+# ignore gtags database for Emacs
+GTAGS
+GRTAGS
+GPATH
