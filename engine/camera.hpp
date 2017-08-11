@@ -64,6 +64,19 @@ namespace camera
         const glm::mat4* ViewMatrix() { return &view; }
         const glm::mat4* ProjectionMatrix() { return &projection; }
 
+        void SetInitialPosition(GLfloat x, GLfloat y, GLfloat z)
+        {
+            pos.x = x;
+            pos.y = y;
+            pos.z = z;
+        }
+        void SetInitialDirection(GLfloat x, GLfloat y, GLfloat z)
+        {
+            front.y = 1.0f;
+            front.z = 0.0f;
+            front = glm::normalize(front);
+        }
+
         void MouseCallback(GLFWwindow* window, double xpos, double ypos)
         {
             GLfloat xoffset = xpos - lastX;
