@@ -66,15 +66,11 @@ namespace camera
 
         void SetInitialPosition(GLfloat x, GLfloat y, GLfloat z)
         {
-            pos.x = x;
-            pos.y = y;
-            pos.z = z;
+            pos = glm::vec3(x, y, z);
         }
+
         void SetInitialDirection(GLfloat x, GLfloat y, GLfloat z)
         {
-            front.y = 1.0f;
-            front.z = 0.0f;
-            front = glm::normalize(front);
         }
 
         void MouseCallback(GLFWwindow* window, double xpos, double ypos)

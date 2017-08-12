@@ -130,6 +130,7 @@ namespace window
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+        glfwWindowHint(GLFW_SAMPLES, 4);
     }
 
     WindowedWindow* create_window(std::string title, int width, as_ratio_t aspect)

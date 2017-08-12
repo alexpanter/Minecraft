@@ -79,7 +79,7 @@ int main()
     // CAMERA
     fps_cam = new camera::BasicFPSCamera(win->Window(), win->width, win->height);
     fps_cam->SetInitialPosition(0.0f, block_size * 1.0f, block_size * 1.0f);
-    //fps_cam->SetInitialDirection(0.0f, 0.0f, 0.0f);
+    fps_cam->SetInitialDirection(0.0f, 0.0f, 0.0f);
 
     // CURSOR
     glfwSetCursorPosCallback(win->Window(), mouse_callback);
@@ -98,6 +98,9 @@ int main()
 
     // enable depth testing, by using the GLFW's z-buffer
     glEnable(GL_DEPTH_TEST);
+
+    // enable multisample for MSAA
+    glEnable(GL_MULTISAMPLE);
 
     // TIMER
     GLfloat deltaTime = 0.0f;
