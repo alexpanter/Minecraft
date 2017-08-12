@@ -1,12 +1,33 @@
 #version 330 core
 
 in vec2 GS_texCoord;
+flat in int which_tex; // 0 for bottom, 1 for side, 2 for top
 
 out vec4 color;
 
-uniform sampler2D texture0;
+uniform sampler2D texture0; // side
+uniform sampler2D texture1; // top
+uniform sampler2D texture2; // bottom
 
 void main()
 {
-    color = texture(texture0, GS_texCoord);
+    switch(which_tex)
+    {
+    case 0:
+        // side
+        color = texture(texture0, vec2(GS_texCoord.x, 1.0f - GS_texCoord.y));
+        break;
+    case 1:
+        // top
+        color = texture(texture1, vec2(GS_texCoord.x, 1.0f - GS_texCoord.y));
+        break;
+    case 2:
+        // bottom
+        color = texture(texture2, vec2(GS_texCoord.x, 1.0f - GS_texCoord.y));
+        break;
+    default:
+        // default equals side
+        color = texture(texture0, vec2(GS_texCoord.x, 1.0f - GS_texCoord.y));
+        break;
+    }
 }

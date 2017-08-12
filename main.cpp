@@ -33,28 +33,21 @@ void do_movement(GLfloat deltaTime);
 camera::BasicFPSCamera* fps_cam;
 
 // GAME WORLD
-//GameWorld* game_world;
+#define WIDTH  10
+#define HEIGHT 5
+#define DEPTH  5
 int block_size = 10;
 
 void create_world(GameWorld* world)
 {
-    world->InsertBlock(0, 0, 0, BLOCK_TYPE_GRASS);
-    world->InsertBlock(1, 0, 0, BLOCK_TYPE_GRASS);
-    world->InsertBlock(2, 0, 0, BLOCK_TYPE_GRASS);
-
-    world->InsertBlock(0, 0, 1, BLOCK_TYPE_GRASS);
-    world->InsertBlock(1, 0, 1, BLOCK_TYPE_GRASS);
-    world->InsertBlock(2, 0, 1, BLOCK_TYPE_GRASS);
-
-    world->InsertBlock(0, 0, 2, BLOCK_TYPE_GRASS);
-    world->InsertBlock(1, 0, 2, BLOCK_TYPE_GRASS);
-    world->InsertBlock(2, 0, 2, BLOCK_TYPE_GRASS);
-
-    world->InsertBlock(2, 1, 1, BLOCK_TYPE_GRASS);
-    world->InsertBlock(1, 1, 2, BLOCK_TYPE_GRASS);
-    world->InsertBlock(2, 1, 2, BLOCK_TYPE_GRASS);
-
-    world->InsertBlock(2, 2, 2, BLOCK_TYPE_GRASS);
+    // plain field of grass:
+    for(int x = 0; x < WIDTH; x++)
+    {
+        for(int z = 0; z < DEPTH; z++)
+        {
+            world->InsertBlock(x, 0, z, BLOCK_TYPE_GRASS);
+        }
+    }
 }
 
 // activated keys
@@ -69,7 +62,7 @@ int main()
     window::WindowedWindow* win = window::create_window(title, 800, as_ratio);
 
     // GAME WORLD
-    GameWorld* game_world = new GameWorld(3, 3, 3);
+    GameWorld* game_world = new GameWorld(WIDTH, HEIGHT, DEPTH);
 
     create_world(game_world);
 
@@ -94,7 +87,9 @@ int main()
 
     // TEXTURES
     unsigned long tex_options = TEX_GENERATE_MIPMAP | TEX_MIXED_FILTER;
-    Texture tex0 = Texture("assets|images|block_grass_1.png", tex_options);
+    Texture tex0 = Texture("assets|images|grass|side.png", tex_options);
+    Texture tex1 = Texture("assets|images|grass|top.png", tex_options);
+    Texture tex2 = Texture("assets|images|grass|bottom.png", tex_options);
 
     // enable depth testing, by using the GLFW's z-buffer
     glEnable(GL_DEPTH_TEST);
@@ -144,6 +139,14 @@ int main()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, tex0.GetTexture());
         glUniform1i(glGetUniformLocation(shader, "texture0"), 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, tex1.GetTexture());
+        glUniform1i(glGetUniformLocation(shader, "texture1"), 1);
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, tex2.GetTexture());
+        glUniform1i(glGetUniformLocation(shader, "texture2"), 2);
 
         // uniform block size
         glUniform1f(glGetUniformLocation(shader, "sz"), (GLfloat)block_size / 2.0f);
