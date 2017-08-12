@@ -21,8 +21,6 @@
 #include "engine/camera.hpp"
 #include "game_world.hpp"
 
-
-
 // FUNCTION PROTOTYPES:
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -31,6 +29,7 @@ void do_movement(GLfloat deltaTime);
 
 // VARIABLES
 camera::BasicFPSCamera* fps_cam;
+glm::vec3 lightPos(0.0f, 30.f, 0.0f);
 
 // GAME WORLD
 #define WIDTH  10
@@ -150,6 +149,9 @@ int main()
 
         // uniform block size
         glUniform1f(glGetUniformLocation(shader, "sz"), (GLfloat)block_size / 2.0f);
+
+        // uniform lighting variables
+        glUniform3fv(glGetUniformLocation(shader, "lightPos"), 1, &lightPos[0]);
 
         // drawing calls
         game_world->DrawBlocks(shader, block_size);

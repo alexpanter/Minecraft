@@ -185,4 +185,18 @@ public:
 
         glBindVertexArray(0);
     }
+
+    void DrawSun(GLuint shader, glm::vec3& position)
+    {
+        glBindVertexArray(_VAO);
+        GLint model_loc = glGetUniformLocation(shader, "model");
+
+        glm::mat4 model;
+        model = glm::translate(model, position * 3.0f);
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
+
+        glDrawArrays(GL_POINTS, 0, 1);
+
+        glBindVertexArray(0);
+    }
 };
