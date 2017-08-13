@@ -8,7 +8,7 @@ main: main.cpp
 	$(GCC) $(FLAGS) $< -o $@ $(LINK) $(LINKSOIL)
 
 test: clean main
-	./main
+	LIBGL_ALWAYS_SOFTWARE=1 ./main
 
 soil:
 	cd lib

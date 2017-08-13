@@ -1,3 +1,4 @@
+
 // GLEW
 #ifndef GLEW_STATIC
 #define GLEW_STATIC
@@ -11,10 +12,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-//#include <glm/gtc/constants.hpp>
+
+// CUSTOM
+#include "./circular_queue_struct.hpp"
 
 // STANDARD
 #include <iostream> // std::cerr
+#include <utility> // std::pair
+
+
+#define SURFACE_MESH_TOP     1
+#define SURFACE_MESH_BACK    2
+#define SURFACE_MESH_LEFT    4
+#define SURFACE_MESH_RIGHT   8
+#define SURFACE_MESH_FRONT  16
+#define SURFACE_MESH_BOTTOM 32
 
 
 typedef enum {
@@ -31,12 +43,19 @@ typedef enum {
 typedef struct _block_t {
     // default health of a block is 10. When health
     // reaches < 0 it should be destroyed.
-    _block_t() : type(BLOCK_TYPE_NONE), health(0) {}
-    _block_t(_block_type_t type) : type(type), health(10) {}
-    _block_t(_block_type_t type, int health) : type(type), health(health) {}
+    _block_t() : type(BLOCK_TYPE_NONE), surface_mesh(0) {}
+    _block_t(_block_type_t type) : type(type)
+    {
+        surface_mesh =
+            SURFACE_MESH_TOP   | SURFACE_MESH_BACK   |
+            SURFACE_MESH_LEFT  | SURFACE_MESH_RIGHT  |
+            SURFACE_MESH_FRONT | SURFACE_MESH_BOTTOM ;
+    }
+    _block_t(_block_type_t type, int surface_mesh)
+        : type(type), surface_mesh(surface_mesh) {}
 
     _block_type_t type;
-    int health;
+    int surface_mesh;
 } _block_t;
 
 
@@ -89,11 +108,11 @@ public:
     GameWorld(int width, int height, int depth)
         : _width(width), _height(height), _depth(depth)
     {
-        // after this initialization, all blocks will have 10 health
-        // and marked as `BLOCK_TYPE_NONE'.
+        // after this initialization all blocks will be marked as `BLOCK_TYPE_NONE'
         _blocks = new _block_t[_height * _width * _depth];
 
         BufferVertexData();
+        GenerateSurfaceMesh();
     }
 
     ~GameWorld()
@@ -104,24 +123,16 @@ public:
     }
 
     // return false if there is already a block at the desired entry
-    //
-    // TODO: block health might be set automatically within this method
-    // according to block type
-    bool InsertBlock(int x, int y, int z, _block_type_t type, int health = 10)
+    bool InsertBlock(int x, int y, int z, _block_type_t type)
     {
-        if(health < 1)
-        {
-            std::cerr << "Inserting block with health < 1" << std::endl;
-            health = 10;
-        }
-
         int index = get_array_position(x, y, z);
         if(_blocks[index].type != BLOCK_TYPE_NONE)
         {
             return false;
         }
 
-        _blocks[index] = _block_t(type, health);
+        // TODO: calculate surface mesh compared to neighbor blocks
+        _blocks[index] = _block_t(type, 0);
         return true;
     }
 
@@ -134,25 +145,38 @@ public:
         }
 
         // more explicit, could use constructor with empty argument list as well
-        _blocks[index] = _block_t(BLOCK_TYPE_NONE, 0);
+        _blocks[index].type = BLOCK_TYPE_NONE;
+        _blocks[index].surface_mesh = 0;
         return true;
     }
 
-    // TODO: return something player can add to inventory..
-    void DecreaseBlockHealth(int x, int y, int z, int health_decrease)
+    // generate surface mesh from the specified starting position
+    void GenerateSurfaceMesh(int x = 0, int y = 0, int z = 0)
     {
-        if(health_decrease < 0)
-        {
-            std::cerr << "Decreasing block health with a negative amount!"
-                      << std::endl;
-            health_decrease = 0;
-        }
-        int index = get_array_position(x, y, z);
-        _blocks[index].health -= health_decrease;
+        DataStructures::CircularQueueStruct<std::pair<_block_t, int> >
+            queue(_width*_height*_depth);
+        int position = get_array_position(x, y, z);
+        queue.Enqueue(std::make_pair(_blocks[position], position));
 
-        if(_blocks[index].health < 0)
+        while(!(queue.IsEmpty()))
         {
-            _blocks[index].type = BLOCK_TYPE_NONE;
+            std::pair<_block_t, int> block = queue.Dequeue();
+
+            // check all 6 neighbor blocks:
+            // top
+            if(_blocks[block.second].type == BLOCK_TYPE_NONE)
+            {}
+
+            // back
+
+            // left
+
+            // right
+
+            // front
+
+            // bottom
+
         }
     }
 
@@ -161,6 +185,7 @@ public:
     {
         glBindVertexArray(_VAO);
         GLint model_loc = glGetUniformLocation(shader, "model");
+        GLint s_mesh_loc = glGetUniformLocation(shader, "surfaceMesh");
 
         for(int i = 0; i < _width; i++)
         {
@@ -168,13 +193,15 @@ public:
             {
                 for(int k = 0; k < _width; k++)
                 {
-                    if(_blocks[get_array_position(i, j, k)].type != BLOCK_TYPE_NONE)
+                    _block_t* index = &_blocks[get_array_position(i, j, k)];
+                    if(index->type != BLOCK_TYPE_NONE)
                     {
                         glm::mat4 model;
                         model = glm::translate(model, glm::vec3(i*size,
                                                                 j*size,
                                                                 k*size));
                         glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
+                        glUniform1i(s_mesh_loc, index->surface_mesh);
 
                         glDrawArrays(GL_POINTS, 0, 1);
                     }
