@@ -183,15 +183,17 @@ public:
         below->y = pos->y - 1;
         below->z = pos->z;
     }
-    inline void get_position_front(glm::ivec3* pos)
+    inline void get_position_front(const glm::ivec3* pos, glm::ivec3* front)
     {
-        if(pos->z <= 0) { pos->x = -1; }
-        pos->z--;
+        front->x = pos->x;
+        front->y = pos->y;
+        front->z = pos->z - 1;
     }
-    inline void get_position_back(glm::ivec3* pos)
+    inline void get_position_behind(const glm::ivec3* pos, glm::ivec3* behind)
     {
-        if(pos->z >= _depth) { pos->x = -1; }
-        pos->z++;
+        behind->x = pos->x;
+        behind->y = pos->y;
+        behind->z = pos->z + 1;
     }
     inline void get_position_left(const glm::ivec3* pos, glm::ivec3* left)
     {
@@ -204,6 +206,12 @@ public:
         right->x = pos->x + 1;
         right->y = pos->y;
         right->z = pos->z;
+    }
+
+    void print_ivec3(glm::ivec3* vec)
+    {
+        std::cout << "(" << vec->x << "," << vec->y << ","
+                  << vec->z << ")" << std::endl;
     }
 
     // generate surface mesh from the specified starting position
@@ -220,21 +228,19 @@ public:
             std::pair<_block_t, glm::ivec3> block = queue.Dequeue();
 
             int pos = get_array_position(block.second.x, block.second.y, block.second.z);
-            std::cout << "pos: " << pos << std::endl;
+            std::cout << "pos: "; print_ivec3(&block.second);
 
             _blocks[pos].surface_mesh |= SURFACE_MESH_CHECKED;
             glm::ivec3 dest(0, 0, 0);
 
             // check all 6 neighbor blocks:
 
-            // back
-
             // left
             get_position_left(&block.second, &dest);
             int left = get_array_position(dest.x, dest.y, dest.z);
-            std::cout << "left: " << left << std::endl;
+            std::cout << "left: "; print_ivec3(&dest);
 
-            if((pos > 0) && _blocks[left].type != BLOCK_TYPE_NONE)
+            if((dest.x >= 0) && _blocks[left].type != BLOCK_TYPE_NONE)
             {
                 std::cout << "found block left of" << std::endl;
                 _blocks[pos].surface_mesh &= (~SURFACE_MESH_LEFT);
@@ -248,9 +254,9 @@ public:
             // right
             get_position_right(&block.second, &dest);
             int right = get_array_position(dest.x, dest.y, dest.z);
-            std::cout << "right: " << right << std::endl;
+            std::cout << "right: "; print_ivec3(&dest);
 
-            if((pos < _width - 1) && _blocks[right].type != BLOCK_TYPE_NONE)
+            if((dest.x < _width) && _blocks[right].type != BLOCK_TYPE_NONE)
             {
                 std::cout << "found block right of" << std::endl;
                 _blocks[pos].surface_mesh &= (~SURFACE_MESH_RIGHT);
@@ -264,9 +270,9 @@ public:
             // above
             get_position_above(&block.second, &dest);
             int above = get_array_position(dest.x, dest.y, dest.z);
-            std::cout << "above: " << above << std::endl;
+            std::cout << "above: "; print_ivec3(&dest);
 
-            if((pos < _height - 1) && _blocks[above].type != BLOCK_TYPE_NONE)
+            if((dest.y < _height) && _blocks[above].type != BLOCK_TYPE_NONE)
             {
                 std::cout << "found block above" << std::endl;
                 _blocks[pos].surface_mesh &= (~SURFACE_MESH_TOP);
@@ -280,18 +286,50 @@ public:
             // below
             get_position_below(&block.second, &dest);
             int below = get_array_position(dest.x, dest.y, dest.z);
-            std::cout << "below: " << below << std::endl;
+            std::cout << "below: "; print_ivec3(&dest);
 
-            if((below >= 0) && _blocks[below].type != BLOCK_TYPE_NONE)
+            if((dest.y >= 0) && _blocks[below].type != BLOCK_TYPE_NONE)
             {
                 std::cout << "found block below" << std::endl;
+                _blocks[pos].surface_mesh &= (~SURFACE_MESH_BOTTOM);
+                if(!(_blocks[below].surface_mesh & SURFACE_MESH_CHECKED))
+                {
+                    std::cout << "adding below" << std::endl;
+                    queue.Enqueue(std::make_pair(_blocks[below], dest));
+                }
             }
 
+            // behind
+            get_position_behind(&block.second, &dest);
+            int behind = get_array_position(dest.x, dest.y, dest.z);
+            std::cout << "behind: "; print_ivec3(&dest);
+
+            if((dest.z < _depth) && _blocks[behind].type != BLOCK_TYPE_NONE)
+            {
+                std::cout << "found block behind" << std::endl;
+                _blocks[pos].surface_mesh &= (~SURFACE_MESH_BACK);
+                if(!(_blocks[behind].surface_mesh & SURFACE_MESH_CHECKED))
+                {
+                    std::cout << "adding behind" << std::endl;
+                    queue.Enqueue(std::make_pair(_blocks[behind], dest));
+                }
+            }
 
             // front
+            get_position_front(&block.second, &dest);
+            int front = get_array_position(dest.x, dest.y, dest.z);
+            std::cout << "front: "; print_ivec3(&dest);
 
-            // bottom
-
+            if((dest.z >= 0) && _blocks[front].type != BLOCK_TYPE_NONE)
+            {
+                std::cout << "found block front" << std::endl;
+                _blocks[pos].surface_mesh &= (~SURFACE_MESH_FRONT);
+                if(!(_blocks[front].surface_mesh & SURFACE_MESH_CHECKED))
+                {
+                    std::cout << "adding front" << std::endl;
+                    queue.Enqueue(std::make_pair(_blocks[front], dest));
+                }
+            }
         }
 
 
@@ -330,7 +368,7 @@ public:
                         glm::mat4 model;
                         model = glm::translate(model, glm::vec3(i*size,
                                                                 j*size,
-                                                                k*size));
+                                                                -k*size));
                         glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
                         glUniform1i(s_mesh_loc, index->surface_mesh);
 

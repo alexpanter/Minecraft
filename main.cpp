@@ -50,6 +50,7 @@ void create_world(GameWorld* world)
     world->InsertBlock(0, 0, 0, BLOCK_TYPE_GRASS);
     world->InsertBlock(1, 0, 0, BLOCK_TYPE_GRASS);
     world->InsertBlock(0, 1, 0, BLOCK_TYPE_GRASS);
+    world->InsertBlock(1, 0, 1, BLOCK_TYPE_GRASS);
 
     world->GenerateSurfaceMesh();
 }
