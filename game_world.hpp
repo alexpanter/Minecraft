@@ -19,14 +19,16 @@
 // STANDARD
 #include <iostream> // std::cerr
 #include <utility> // std::pair
+#include <cassert>
 
 
-#define SURFACE_MESH_TOP     1
-#define SURFACE_MESH_BACK    2
-#define SURFACE_MESH_LEFT    4
-#define SURFACE_MESH_RIGHT   8
-#define SURFACE_MESH_FRONT  16
-#define SURFACE_MESH_BOTTOM 32
+#define SURFACE_MESH_TOP      1
+#define SURFACE_MESH_BACK     2
+#define SURFACE_MESH_LEFT     4
+#define SURFACE_MESH_RIGHT    8
+#define SURFACE_MESH_FRONT   16
+#define SURFACE_MESH_BOTTOM  32
+#define SURFACE_MESH_CHECKED 64
 
 
 typedef enum {
@@ -46,6 +48,7 @@ typedef struct _block_t {
     _block_t() : type(BLOCK_TYPE_NONE), surface_mesh(0) {}
     _block_t(_block_type_t type) : type(type)
     {
+        surface_mesh = 0;
         surface_mesh =
             SURFACE_MESH_TOP   | SURFACE_MESH_BACK   |
             SURFACE_MESH_LEFT  | SURFACE_MESH_RIGHT  |
@@ -111,8 +114,24 @@ public:
         // after this initialization all blocks will be marked as `BLOCK_TYPE_NONE'
         _blocks = new _block_t[_height * _width * _depth];
 
+        for(int i = 0; i < _height * _width * _depth; i++)
+        {
+            _blocks[i] = _block_t(BLOCK_TYPE_NONE);
+        }
+
+        // testing that the game world is _actually_ initially empty!
+        for(int i = 0; i < _width; i++)
+        {
+            for(int j = 0; j < _height; j++)
+            {
+                for(int k = 0; k < _depth; k++)
+                {
+                    assert(_blocks[get_array_position(i, j, k)].type == BLOCK_TYPE_NONE);
+                }
+            }
+        }
+
         BufferVertexData();
-        GenerateSurfaceMesh();
     }
 
     ~GameWorld()
@@ -132,7 +151,7 @@ public:
         }
 
         // TODO: calculate surface mesh compared to neighbor blocks
-        _blocks[index] = _block_t(type, 0);
+        _blocks[index] = _block_t(type);
         return true;
     }
 
@@ -150,34 +169,146 @@ public:
         return true;
     }
 
+    // get_position_* (source, destination)
+    // will copy modified data from source to destination
+    inline void get_position_above(const glm::ivec3* pos, glm::ivec3* above)
+    {
+        above->x = pos->x;
+        above->y = pos->y + 1;
+        above->z = pos->z;
+    }
+    inline void get_position_below(const glm::ivec3* pos, glm::ivec3* below)
+    {
+        below->x = pos->x;
+        below->y = pos->y - 1;
+        below->z = pos->z;
+    }
+    inline void get_position_front(glm::ivec3* pos)
+    {
+        if(pos->z <= 0) { pos->x = -1; }
+        pos->z--;
+    }
+    inline void get_position_back(glm::ivec3* pos)
+    {
+        if(pos->z >= _depth) { pos->x = -1; }
+        pos->z++;
+    }
+    inline void get_position_left(const glm::ivec3* pos, glm::ivec3* left)
+    {
+        left->x = pos->x - 1;
+        left->y = pos->y;
+        left->z = pos->z;
+    }
+    inline void get_position_right(const glm::ivec3* pos, glm::ivec3* right)
+    {
+        right->x = pos->x + 1;
+        right->y = pos->y;
+        right->z = pos->z;
+    }
+
     // generate surface mesh from the specified starting position
     void GenerateSurfaceMesh(int x = 0, int y = 0, int z = 0)
     {
-        DataStructures::CircularQueueStruct<std::pair<_block_t, int> >
+        DataStructures::CircularQueueStruct<std::pair<_block_t, glm::ivec3> >
             queue(_width*_height*_depth);
         int position = get_array_position(x, y, z);
-        queue.Enqueue(std::make_pair(_blocks[position], position));
+        queue.Enqueue(std::make_pair(_blocks[position], glm::ivec3(x,y,z)));
 
         while(!(queue.IsEmpty()))
         {
-            std::pair<_block_t, int> block = queue.Dequeue();
+            std::cout << std::endl << "queue iteration" << std::endl;
+            std::pair<_block_t, glm::ivec3> block = queue.Dequeue();
+
+            int pos = get_array_position(block.second.x, block.second.y, block.second.z);
+            std::cout << "pos: " << pos << std::endl;
+
+            _blocks[pos].surface_mesh |= SURFACE_MESH_CHECKED;
+            glm::ivec3 dest(0, 0, 0);
 
             // check all 6 neighbor blocks:
-            // top
-            if(_blocks[block.second].type == BLOCK_TYPE_NONE)
-            {}
 
             // back
 
             // left
+            get_position_left(&block.second, &dest);
+            int left = get_array_position(dest.x, dest.y, dest.z);
+            std::cout << "left: " << left << std::endl;
+
+            if((pos > 0) && _blocks[left].type != BLOCK_TYPE_NONE)
+            {
+                std::cout << "found block left of" << std::endl;
+                _blocks[pos].surface_mesh &= (~SURFACE_MESH_LEFT);
+                if(!(_blocks[left].surface_mesh & SURFACE_MESH_CHECKED))
+                {
+                    std::cout << "adding left" << std::endl;
+                    queue.Enqueue(std::make_pair(_blocks[left], dest));
+                }
+            }
 
             // right
+            get_position_right(&block.second, &dest);
+            int right = get_array_position(dest.x, dest.y, dest.z);
+            std::cout << "right: " << right << std::endl;
+
+            if((pos < _width - 1) && _blocks[right].type != BLOCK_TYPE_NONE)
+            {
+                std::cout << "found block right of" << std::endl;
+                _blocks[pos].surface_mesh &= (~SURFACE_MESH_RIGHT);
+                if(!(_blocks[right].surface_mesh & SURFACE_MESH_CHECKED))
+                {
+                    std::cout << "adding right" << std::endl;
+                    queue.Enqueue(std::make_pair(_blocks[right], dest));
+                }
+            }
+
+            // above
+            get_position_above(&block.second, &dest);
+            int above = get_array_position(dest.x, dest.y, dest.z);
+            std::cout << "above: " << above << std::endl;
+
+            if((pos < _height - 1) && _blocks[above].type != BLOCK_TYPE_NONE)
+            {
+                std::cout << "found block above" << std::endl;
+                _blocks[pos].surface_mesh &= (~SURFACE_MESH_TOP);
+                if(!(_blocks[above].surface_mesh & SURFACE_MESH_CHECKED))
+                {
+                    std::cout << "adding above" << std::endl;
+                    queue.Enqueue(std::make_pair(_blocks[above], dest));
+                }
+            }
+
+            // below
+            get_position_below(&block.second, &dest);
+            int below = get_array_position(dest.x, dest.y, dest.z);
+            std::cout << "below: " << below << std::endl;
+
+            if((below >= 0) && _blocks[below].type != BLOCK_TYPE_NONE)
+            {
+                std::cout << "found block below" << std::endl;
+            }
+
 
             // front
 
             // bottom
 
         }
+
+
+        // for testing purposes, outcomment or delete when convinced
+        // about program correctness
+        // for(int x = 0; x < _width; x++)
+        // {
+        //     for(int y = 0; y < _height; y++)
+        //     {
+        //         for(int z = 0; z < _depth; z++)
+        //         {
+        //             std::cout << "(x,y,z) = (" << x << "," << y << "," << z
+        //                       << ")  =  " << _blocks[get_array_position(x, y, z)].type
+        //                       << std::endl;
+        //         }
+        //     }
+        // }
     }
 
     // VERY naive approach, but good enough for simple demonstration
@@ -191,7 +322,7 @@ public:
         {
             for(int j = 0; j < _height; j++)
             {
-                for(int k = 0; k < _width; k++)
+                for(int k = 0; k < _depth; k++)
                 {
                     _block_t* index = &_blocks[get_array_position(i, j, k)];
                     if(index->type != BLOCK_TYPE_NONE)

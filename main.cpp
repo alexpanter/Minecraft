@@ -32,21 +32,26 @@ camera::BasicFPSCamera* fps_cam;
 glm::vec3 lightPos(0.0f, 30.f, 0.0f);
 
 // GAME WORLD
-#define WIDTH  10
-#define HEIGHT 5
-#define DEPTH  5
+#define WIDTH  3
+#define HEIGHT 3
+#define DEPTH  3
 int block_size = 10;
 
 void create_world(GameWorld* world)
 {
     // plain field of grass:
-    for(int x = 0; x < WIDTH; x++)
-    {
-        for(int z = 0; z < DEPTH; z++)
-        {
-            world->InsertBlock(x, 0, z, BLOCK_TYPE_GRASS);
-        }
-    }
+    // for(int x = 0; x < WIDTH; x++)
+    // {
+    //     for(int z = 0; z < DEPTH; z++)
+    //     {
+    //         world->InsertBlock(x, 0, z, BLOCK_TYPE_GRASS);
+    //     }
+    // }
+    world->InsertBlock(0, 0, 0, BLOCK_TYPE_GRASS);
+    world->InsertBlock(1, 0, 0, BLOCK_TYPE_GRASS);
+    world->InsertBlock(0, 1, 0, BLOCK_TYPE_GRASS);
+
+    world->GenerateSurfaceMesh();
 }
 
 // activated keys
@@ -95,6 +100,11 @@ int main()
 
     // enable multisample for MSAA
     glEnable(GL_MULTISAMPLE);
+
+    // enable face culling to discard back faces in the rendering stage
+    glFrontFace(GL_CW); // triangle vertices are read clock-wise
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK); // cull (discard) back faces
 
     // TIMER
     GLfloat deltaTime = 0.0f;
