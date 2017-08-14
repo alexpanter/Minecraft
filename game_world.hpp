@@ -224,11 +224,11 @@ public:
 
         while(!(queue.IsEmpty()))
         {
-            std::cout << std::endl << "queue iteration" << std::endl;
+            //std::cout << std::endl << "queue iteration" << std::endl;
             std::pair<_block_t, glm::ivec3> block = queue.Dequeue();
 
             int pos = get_array_position(block.second.x, block.second.y, block.second.z);
-            std::cout << "pos: "; print_ivec3(&block.second);
+            //std::cout << "pos: "; print_ivec3(&block.second);
 
             _blocks[pos].surface_mesh |= SURFACE_MESH_CHECKED;
             glm::ivec3 dest(0, 0, 0);
@@ -238,15 +238,15 @@ public:
             // left
             get_position_left(&block.second, &dest);
             int left = get_array_position(dest.x, dest.y, dest.z);
-            std::cout << "left: "; print_ivec3(&dest);
+            //std::cout << "left: "; print_ivec3(&dest);
 
             if((dest.x >= 0) && _blocks[left].type != BLOCK_TYPE_NONE)
             {
-                std::cout << "found block left of" << std::endl;
+                //std::cout << "found block left of" << std::endl;
                 _blocks[pos].surface_mesh &= (~SURFACE_MESH_LEFT);
                 if(!(_blocks[left].surface_mesh & SURFACE_MESH_CHECKED))
                 {
-                    std::cout << "adding left" << std::endl;
+                    //std::cout << "adding left" << std::endl;
                     queue.Enqueue(std::make_pair(_blocks[left], dest));
                 }
             }
@@ -254,15 +254,15 @@ public:
             // right
             get_position_right(&block.second, &dest);
             int right = get_array_position(dest.x, dest.y, dest.z);
-            std::cout << "right: "; print_ivec3(&dest);
+            //std::cout << "right: "; print_ivec3(&dest);
 
             if((dest.x < _width) && _blocks[right].type != BLOCK_TYPE_NONE)
             {
-                std::cout << "found block right of" << std::endl;
+                //std::cout << "found block right of" << std::endl;
                 _blocks[pos].surface_mesh &= (~SURFACE_MESH_RIGHT);
                 if(!(_blocks[right].surface_mesh & SURFACE_MESH_CHECKED))
                 {
-                    std::cout << "adding right" << std::endl;
+                    //std::cout << "adding right" << std::endl;
                     queue.Enqueue(std::make_pair(_blocks[right], dest));
                 }
             }
@@ -270,15 +270,15 @@ public:
             // above
             get_position_above(&block.second, &dest);
             int above = get_array_position(dest.x, dest.y, dest.z);
-            std::cout << "above: "; print_ivec3(&dest);
+            //std::cout << "above: "; print_ivec3(&dest);
 
             if((dest.y < _height) && _blocks[above].type != BLOCK_TYPE_NONE)
             {
-                std::cout << "found block above" << std::endl;
+                //std::cout << "found block above" << std::endl;
                 _blocks[pos].surface_mesh &= (~SURFACE_MESH_TOP);
                 if(!(_blocks[above].surface_mesh & SURFACE_MESH_CHECKED))
                 {
-                    std::cout << "adding above" << std::endl;
+                    //std::cout << "adding above" << std::endl;
                     queue.Enqueue(std::make_pair(_blocks[above], dest));
                 }
             }
@@ -286,15 +286,15 @@ public:
             // below
             get_position_below(&block.second, &dest);
             int below = get_array_position(dest.x, dest.y, dest.z);
-            std::cout << "below: "; print_ivec3(&dest);
+            //std::cout << "below: "; print_ivec3(&dest);
 
             if((dest.y >= 0) && _blocks[below].type != BLOCK_TYPE_NONE)
             {
-                std::cout << "found block below" << std::endl;
+                //std::cout << "found block below" << std::endl;
                 _blocks[pos].surface_mesh &= (~SURFACE_MESH_BOTTOM);
                 if(!(_blocks[below].surface_mesh & SURFACE_MESH_CHECKED))
                 {
-                    std::cout << "adding below" << std::endl;
+                    //std::cout << "adding below" << std::endl;
                     queue.Enqueue(std::make_pair(_blocks[below], dest));
                 }
             }
@@ -302,15 +302,15 @@ public:
             // behind
             get_position_behind(&block.second, &dest);
             int behind = get_array_position(dest.x, dest.y, dest.z);
-            std::cout << "behind: "; print_ivec3(&dest);
+            //std::cout << "behind: "; print_ivec3(&dest);
 
             if((dest.z < _depth) && _blocks[behind].type != BLOCK_TYPE_NONE)
             {
-                std::cout << "found block behind" << std::endl;
+                //std::cout << "found block behind" << std::endl;
                 _blocks[pos].surface_mesh &= (~SURFACE_MESH_BACK);
                 if(!(_blocks[behind].surface_mesh & SURFACE_MESH_CHECKED))
                 {
-                    std::cout << "adding behind" << std::endl;
+                    //std::cout << "adding behind" << std::endl;
                     queue.Enqueue(std::make_pair(_blocks[behind], dest));
                 }
             }
@@ -318,15 +318,15 @@ public:
             // front
             get_position_front(&block.second, &dest);
             int front = get_array_position(dest.x, dest.y, dest.z);
-            std::cout << "front: "; print_ivec3(&dest);
+            //std::cout << "front: "; print_ivec3(&dest);
 
             if((dest.z >= 0) && _blocks[front].type != BLOCK_TYPE_NONE)
             {
-                std::cout << "found block front" << std::endl;
+                //std::cout << "found block front" << std::endl;
                 _blocks[pos].surface_mesh &= (~SURFACE_MESH_FRONT);
                 if(!(_blocks[front].surface_mesh & SURFACE_MESH_CHECKED))
                 {
-                    std::cout << "adding front" << std::endl;
+                    //std::cout << "adding front" << std::endl;
                     queue.Enqueue(std::make_pair(_blocks[front], dest));
                 }
             }
