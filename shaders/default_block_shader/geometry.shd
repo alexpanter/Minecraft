@@ -44,6 +44,15 @@ void main()
     vec4 mmm = trans * vec4(pos.x - sz, pos.y - sz, pos.z - sz, pos.w);
     vec4 mpm = trans * vec4(pos.x - sz, pos.y + sz, pos.z - sz, pos.w);
 
+    //     mpm------ppm
+    //     /|       /|
+    //    / |      / |
+    //  mpp------ppp |
+    //   |  |     |  |
+    //   | mmm----|-pmm
+    //   | /      | /
+    //   |/       |/
+    //  mmp------pmp
 
     int front = surfaceMesh & SURFACE_MESH_FRONT;
     if(front > 0)
