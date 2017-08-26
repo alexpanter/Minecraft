@@ -20,6 +20,7 @@
 #include <iostream> // std::cerr
 #include <utility> // std::pair
 #include <cassert>
+#include <stdio.h>
 
 
 #define SURFACE_MESH_TOP      1
@@ -144,6 +145,12 @@ public:
     // return false if there is already a block at the desired entry
     bool InsertBlock(int x, int y, int z, _block_type_t type)
     {
+        if(x >= _width || x < 0 || y >= _height || y < 0 || z >= _depth || z < 0)
+        {
+            fprintf(stderr, "Error inserting block: invalid index (%i, %i, %i)\n",
+                    x, y, z);
+            return false;
+        }
         int index = get_array_position(x, y, z);
         if(_blocks[index].type != BLOCK_TYPE_NONE)
         {
@@ -157,6 +164,12 @@ public:
 
     bool DeleteBlock(int x, int y, int z)
     {
+        if(x >= _width || x < 0 || y >= _height || y < 0 || z >= _depth || z < 0)
+        {
+            fprintf(stderr, "Error deleting block: invalid index (%i, %i, %i)\n",
+                    x, y, z);
+            return false;
+        }
         int index = get_array_position(x, y, z);
         if(_blocks[index].type != BLOCK_TYPE_NONE)
         {
@@ -356,25 +369,24 @@ public:
         GLint model_loc = glGetUniformLocation(shader, "model");
         GLint s_mesh_loc = glGetUniformLocation(shader, "surfaceMesh");
 
-        for(int i = 0; i < _width; i++)
+        for(int x = 0; x < _width; x++)
         {
-            for(int j = 0; j < _height; j++)
+            for(int y = 0; y < _height; y++)
             {
-                for(int k = 0; k < _depth; k++)
+                for(int z = 0; z < _depth; z++)
                 {
-                    _block_t* index = &_blocks[get_array_position(i, j, k)];
+                    _block_t* index = &_blocks[get_array_position(x, y, z)];
                     if(index->type != BLOCK_TYPE_NONE)
                     {
                         glm::mat4 model;
-                        model = glm::translate(model, glm::vec3(i*size,
-                                                                j*size,
-                                                                -k*size));
+                        model = glm::translate(model, glm::vec3(x*size,
+                                                                y*size,
+                                                                -z*size));
                         glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
                         glUniform1i(s_mesh_loc, index->surface_mesh);
 
                         glDrawArrays(GL_POINTS, 0, 1);
                     }
-
                 }
             }
         }
