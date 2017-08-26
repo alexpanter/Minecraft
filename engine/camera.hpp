@@ -38,6 +38,8 @@ namespace camera
         GLfloat yaw;
         GLfloat pitch;
 
+        GLfloat view_distance;
+
     public:
         ~BasicFPSCamera() {}
         BasicFPSCamera(GLFWwindow* win, GLfloat width, GLfloat height)
@@ -59,6 +61,8 @@ namespace camera
 
             yaw = -90.f;
             pitch = 0.0f;
+
+            view_distance = 400.0f;
         }
 
         const glm::mat4* ViewMatrix() { return &view; }
@@ -71,6 +75,11 @@ namespace camera
 
         void SetInitialDirection(GLfloat x, GLfloat y, GLfloat z)
         {
+        }
+
+        void SetViewDistance(GLfloat dist)
+        {
+            view_distance = dist;
         }
 
         void MouseCallback(GLFWwindow* window, double xpos, double ypos)
@@ -135,7 +144,7 @@ namespace camera
         {
             view = glm::lookAt(pos, pos + front, up);
             projection = glm::perspective(fov, window_width / window_height,
-                                          0.1f, 200.0f);
+                                          0.1f, view_distance);
         }
     }; // BasicFPSCamera
 
