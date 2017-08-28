@@ -37,7 +37,7 @@ glm::vec3 lightPos(0.0f, 30.f, 0.0f);
 #define DEPTH  30
 int block_size = 10;
 
-void create_world(GameWorld* world)
+void create_grass_plain(GameWorld* world)
 {
     // plain field of grass:
     for(int x = 0; x < WIDTH; x++)
@@ -47,10 +47,21 @@ void create_world(GameWorld* world)
             world->InsertBlock(x, 0, z, BLOCK_TYPE_GRASS);
         }
     }
-    // world->InsertBlock(0, 0, 0, BLOCK_TYPE_GRASS);
-    // world->InsertBlock(1, 0, 0, BLOCK_TYPE_GRASS);
-    // world->InsertBlock(0, 1, 0, BLOCK_TYPE_GRASS);
-    // world->InsertBlock(1, 0, 1, BLOCK_TYPE_GRASS);
+
+    world->GenerateSurfaceMesh();
+}
+void create_grass_cube(GameWorld* world)
+{
+    for(int x = 0; x < WIDTH; x++)
+    {
+        for(int y = 0; y < HEIGHT; y++)
+        {
+            for(int z = 0; z < DEPTH; z++)
+            {
+                world->InsertBlock(x, y, z, BLOCK_TYPE_GRASS);
+            }
+        }
+    }
 
     world->GenerateSurfaceMesh();
 }
@@ -69,7 +80,7 @@ int main()
     // GAME WORLD
     GameWorld* game_world = new GameWorld(WIDTH, HEIGHT, DEPTH);
 
-    create_world(game_world);
+    create_grass_plain(game_world);
 
     // KEY EVENTS
     glfwSetKeyCallback(win->Window(), key_callback);

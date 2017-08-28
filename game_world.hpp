@@ -65,6 +65,7 @@ typedef struct _block_t {
 
 class GameWorld
 {
+protected:
     // dimensions of the game world
     int _width;
     int _height;
@@ -104,7 +105,7 @@ class GameWorld
 
     inline int get_array_position(int x, int y, int z)
     {
-        return (z * _height * _width) + (y * _height) + x;
+        return (z * _height * _width) + (y * _width) + x;
     }
 
 
@@ -113,21 +114,22 @@ public:
         : _width(width), _height(height), _depth(depth)
     {
         // after this initialization all blocks will be marked as `BLOCK_TYPE_NONE'
-        _blocks = new _block_t[_height * _width * _depth];
+        int total = _width * _height * _depth;
+        _blocks = new _block_t[total];
 
-        for(int i = 0; i < _height * _width * _depth; i++)
+        for(int i = 0; i < total; i++)
         {
             _blocks[i] = _block_t(BLOCK_TYPE_NONE);
         }
 
         // testing that the game world is _actually_ initially empty!
-        for(int i = 0; i < _width; i++)
+        for(int x = 0; x < _width; x++)
         {
-            for(int j = 0; j < _height; j++)
+            for(int y = 0; y < _height; y++)
             {
-                for(int k = 0; k < _depth; k++)
+                for(int z = 0; z < _depth; z++)
                 {
-                    assert(_blocks[get_array_position(i, j, k)].type == BLOCK_TYPE_NONE);
+                    assert(_blocks[get_array_position(x, y, z)].type == BLOCK_TYPE_NONE);
                 }
             }
         }
