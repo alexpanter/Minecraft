@@ -21,6 +21,7 @@
 #include <utility> // std::pair
 #include <cassert>
 #include <stdio.h>
+#include <vector>
 
 
 #define SURFACE_MESH_TOP      1
@@ -33,14 +34,16 @@
 
 
 typedef enum {
-    BLOCK_TYPE_EARTH,
-    BLOCK_TYPE_GRASS,
-    BLOCK_TYPE_STONE,
-
     // a block that does not exist, should not be used
     // for collision detection or AI routines, and
     // definitely not should be drawn.
-    BLOCK_TYPE_NONE
+    BLOCK_TYPE_NONE,
+
+    BLOCK_TYPE_EARTH,
+    BLOCK_TYPE_GRASS,
+    BLOCK_TYPE_STONE
+    // ...
+
 } _block_type_t;
 
 typedef struct _block_t {
@@ -60,6 +63,7 @@ typedef struct _block_t {
 
     _block_type_t type;
     int surface_mesh;
+    glm::vec3 world_pos;
 } _block_t;
 
 
@@ -71,15 +75,10 @@ protected:
     int _height;
     int _depth;
 
-    _block_t* _blocks;
+    std::vector<_block_t> _blocks;
 
     // default vertex buffer data to satisfy OpenGL, for now..
     GLuint _VBO, _VAO;
-
-    GLfloat _vertices[3] = {
-        // Positions
-        0.0f, 0.0f, 0.0f
-    };
 
     void BufferVertexData()
     {
@@ -90,13 +89,26 @@ protected:
         // and attribute pointer(s)
         glBindVertexArray(_VAO);
 
-        // vertices
+        // buffer the world data
         glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), _vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, _blocks.size() * sizeof(_block_t),
+                     _blocks.data(), GL_STATIC_DRAW);
+
+
+        // block type (none, earth, grass, stone, ...)
+        glVertexAttribPointer(0, 1, GL_INT, GL_FALSE, sizeof(_block_t), (GLvoid*)0);
+        glEnableVertexAttribArray(0);
+
+        // surface mesh (front | left | right | ...)
+        glVertexAttribPointer(1, 1, GL_INT, GL_FALSE, sizeof(_block_t),
+                              (GLvoid*)(sizeof(_block_type_t)));
+        glEnableVertexAttribArray(1);
 
         // position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(_block_t),
+                              (GLvoid*)(sizeof(int) + sizeof(_block_type_t)));
+        glEnableVertexAttribArray(2);
+
 
         // good practice to unbind the VAO to prevent strange bugs
         // do NOT unbind the EBO, keep it bound to this VAO
@@ -115,11 +127,19 @@ public:
     {
         // after this initialization all blocks will be marked as `BLOCK_TYPE_NONE'
         int total = _width * _height * _depth;
-        _blocks = new _block_t[total];
+        _blocks.resize(total);
 
-        for(int i = 0; i < total; i++)
+        for(int x = 0; x < _width; x++)
         {
-            _blocks[i] = _block_t(BLOCK_TYPE_NONE);
+            for(int y = 0; y < _height; y++)
+            {
+                for(int z = 0; z < _depth; z++)
+                {
+                    int idx = get_array_position(x, y, z);
+                    _blocks[idx] = _block_t(BLOCK_TYPE_NONE);
+                    _blocks[idx].world_pos = glm::vec3(x, y, z);
+                }
+            }
         }
 
         // testing that the game world is _actually_ initially empty!
@@ -133,13 +153,10 @@ public:
                 }
             }
         }
-
-        BufferVertexData();
     }
 
     ~GameWorld()
     {
-        delete _blocks;
         glDeleteVertexArrays(1, &_VAO);
         glDeleteBuffers(1, &_VBO);
     }
@@ -362,37 +379,15 @@ public:
         //         }
         //     }
         // }
+
+        BufferVertexData();
     }
 
     // VERY naive approach, but good enough for simple demonstration
-    void DrawBlocks(GLuint shader, int size)
+    void DrawBlocks()
     {
         glBindVertexArray(_VAO);
-        GLint model_loc = glGetUniformLocation(shader, "model");
-        GLint s_mesh_loc = glGetUniformLocation(shader, "surfaceMesh");
-
-        for(int x = 0; x < _width; x++)
-        {
-            for(int y = 0; y < _height; y++)
-            {
-                for(int z = 0; z < _depth; z++)
-                {
-                    _block_t* index = &_blocks[get_array_position(x, y, z)];
-                    if(index->type != BLOCK_TYPE_NONE)
-                    {
-                        glm::mat4 model;
-                        model = glm::translate(model, glm::vec3(x*size,
-                                                                y*size,
-                                                                -z*size));
-                        glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
-                        glUniform1i(s_mesh_loc, index->surface_mesh);
-
-                        glDrawArrays(GL_POINTS, 0, 1);
-                    }
-                }
-            }
-        }
-
+        glDrawArrays(GL_POINTS, 0, _blocks.size());
         glBindVertexArray(0);
     }
 

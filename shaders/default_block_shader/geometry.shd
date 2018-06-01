@@ -3,13 +3,13 @@
 layout (points) in;
 layout (triangle_strip, max_vertices = 36) out;
 
-uniform mat4 model;
+// no model matrix is necessary since block coordinates
+// are already in world space
 uniform mat4 view;
 uniform mat4 projection;
 
 // halfsize of a block
 uniform float sz;
-uniform int surfaceMesh;
 
 // how to interpret the surface mesh data for the vertex
 #define SURFACE_MESH_TOP     1
@@ -28,7 +28,9 @@ out vec3 fragPos;
 void main()
 {
     vec4 pos = gl_in[0].gl_Position;
-    mat4 trans = projection * view * model;
+    int surfaceMesh = int(pos.w);
+    pos.w = 1.0f;
+    mat4 trans = projection * view;
 
     // emitted vertices are to be interpreted as if using the 3-finger rule:
     // x goes to the right, y goes up, z goes to the front
@@ -59,28 +61,28 @@ void main()
     {
         gl_Position = mmp; GS_texCoord = vec2(0.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = mpp; GS_texCoord = vec2(0.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = ppp; GS_texCoord = vec2(1.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
         gl_Position = mmp; GS_texCoord = vec2(0.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = ppp; GS_texCoord = vec2(1.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = pmp; GS_texCoord = vec2(1.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
     }
@@ -90,28 +92,28 @@ void main()
     {
         gl_Position = ppm; GS_texCoord = vec2(0.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = mpm; GS_texCoord = vec2(1.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = mmm; GS_texCoord = vec2(1.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
         gl_Position = ppm; GS_texCoord = vec2(0.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = mmm; GS_texCoord = vec2(1.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = pmm; GS_texCoord = vec2(0.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
     }
@@ -121,28 +123,28 @@ void main()
     {
         gl_Position = mpp; GS_texCoord = vec2(0.0f, 0.0f);
         which_tex = 1; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = mpm; GS_texCoord = vec2(0.0f, 1.0f);
         which_tex = 1; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = ppm; GS_texCoord = vec2(1.0f, 1.0f);
         which_tex = 1; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
         gl_Position = mpp; GS_texCoord = vec2(0.0f, 0.0f);
         which_tex = 1; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = ppm; GS_texCoord = vec2(1.0f, 1.0f);
         which_tex = 1; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = ppp; GS_texCoord = vec2(1.0f, 0.0f);
         which_tex = 1; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
     }
@@ -152,28 +154,28 @@ void main()
     {
         gl_Position = mmm; GS_texCoord = vec2(0.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = mpm; GS_texCoord = vec2(0.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = mpp; GS_texCoord = vec2(1.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
         gl_Position = mmm; GS_texCoord = vec2(0.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = mpp; GS_texCoord = vec2(1.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = mmp; GS_texCoord = vec2(1.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
     }
@@ -183,28 +185,28 @@ void main()
     {
         gl_Position = pmp; GS_texCoord = vec2(0.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = ppp; GS_texCoord = vec2(0.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = ppm; GS_texCoord = vec2(1.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
         gl_Position = pmp; GS_texCoord = vec2(0.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = ppm; GS_texCoord = vec2(1.0f, 1.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = pmm; GS_texCoord = vec2(1.0f, 0.0f);
         which_tex = 0; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
     }
@@ -214,28 +216,28 @@ void main()
     {
         gl_Position = mmm; GS_texCoord = vec2(0.0f, 0.0f);
         which_tex = 2; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = mmp; GS_texCoord = vec2(0.0f, 1.0f);
         which_tex = 2; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = pmp; GS_texCoord = vec2(1.0f, 1.0f);
         which_tex = 2; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
         gl_Position = mmm; GS_texCoord = vec2(0.0f, 0.0f);
         which_tex = 2; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = pmp; GS_texCoord = vec2(1.0f, 1.0f);
         which_tex = 2; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         gl_Position = pmm; GS_texCoord = vec2(1.0f, 0.0f);
         which_tex = 2; normal = gl_Position.xyz - pos.xyz;
-        fragPos = vec4(model * gl_Position).xyz;
+        fragPos = vec4(gl_Position).xyz;
         EmitVertex();
         EndPrimitive();
     }

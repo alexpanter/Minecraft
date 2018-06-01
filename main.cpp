@@ -79,7 +79,6 @@ int main()
 
     // GAME WORLD
     GameWorld* game_world = new GameWorld(WIDTH, HEIGHT, DEPTH);
-
     create_grass_plain(game_world);
 
     // KEY EVENTS
@@ -176,7 +175,7 @@ int main()
         glUniform3fv(glGetUniformLocation(shader, "lightPos"), 1, &lightPos[0]);
 
         // drawing calls
-        game_world->DrawBlocks(shader, block_size);
+        game_world->DrawBlocks();
 
         // double-buffering
         glfwSwapBuffers(win->Window());
